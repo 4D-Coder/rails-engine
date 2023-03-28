@@ -1,3 +1,3 @@
-class Customer < ApplicationRecord
-  
+class Item < ApplicationRecord
+  belongs_to :merchant
 end
