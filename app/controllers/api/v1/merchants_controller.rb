@@ -5,7 +5,6 @@ class Api::V1::MerchantsController < ApplicationController
 
   def show
     render json: MerchantSerializer.new(one_merchant(params[:id])).serializable_hash
-
   end
 
   private
