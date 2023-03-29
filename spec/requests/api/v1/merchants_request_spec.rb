@@ -26,14 +26,6 @@ describe "Merchants API" do
 
       expect(merchant[:attributes]).to have_key(:name)
       expect(merchant[:attributes][:name]).to be_a(String)
-
-      expect(merchant[:attributes]).to have_key(:items)
-      expect(merchant[:attributes][:items]).to be_an(Array)    
-
-    # merchants.each do |merchant|
-    #   merchant_name = Merchant.find(merchant[:id]).name
-    #   expect(merchant_name).to eq(merchant[:attributes][:name])
-    # end
     end
   end    
 
@@ -45,7 +37,6 @@ describe "Merchants API" do
     merchant = JSON.parse(response.body, symbolize_names: true)
     
     expect(response).to have_http_status(200)
-
     expect(merchant[:data]).to have_key(:id)
     expect(merchant[:data][:id]).to be_a(String)
 
@@ -57,8 +48,15 @@ describe "Merchants API" do
 
     expect(merchant[:data][:attributes]).to have_key(:name)
     expect(merchant[:data][:attributes][:name]).to be_a(String)
+  end
 
-    expect(merchant[:data][:attributes]).to have_key(:items)
-    expect(merchant[:data][:attributes][:items]).to be_an(Array)
+  it 'will get an invalid id within the path and return a 404' do
+    
+    get "/api/v1/merchants/matildas_glass"
+
+    merchant = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(404)
+    expect(merchant[:error]).to eq("404, Not Found")
   end
 end

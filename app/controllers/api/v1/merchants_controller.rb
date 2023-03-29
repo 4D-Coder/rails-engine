@@ -1,4 +1,6 @@
 class Api::V1::MerchantsController < ApplicationController
+  rescue_from ActiveRecord::RecordNotFound, with: :not_found
+
   def index
     render json: MerchantSerializer.new(all_merchants)
   end
@@ -8,6 +10,10 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   private
+
+  def not_found
+    render json: {error: "404, Not Found"}, status: :not_found
+  end
 
   def all_merchants
     @merchants ||= Merchant.all
