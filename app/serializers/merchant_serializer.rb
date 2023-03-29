@@ -1,7 +1,6 @@
 class MerchantSerializer
   include JSONAPI::Serializer
-  attributes :name, :items
-  has_many :items
+  attributes :name
   # def serializable_hash
   #   if super[:data].is_a?(Array)
   #     super
@@ -9,5 +8,4 @@ class MerchantSerializer
   #     {data: [super[:data]]}
   #   end
   # end
-  
 end
