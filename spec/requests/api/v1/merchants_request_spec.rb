@@ -1,10 +1,10 @@
-require 'rails_helper'
+require "rails_helper"
 
 describe "Merchants API" do
   it "sends a list of merchants" do
     create_list(:merchant, 3)
 
-    get '/api/v1/merchants'
+    get "/api/v1/merchants"
 
     expect(response).to have_http_status(200)
 
@@ -27,15 +27,15 @@ describe "Merchants API" do
       expect(merchant[:attributes]).to have_key(:name)
       expect(merchant[:attributes][:name]).to be_a(String)
     end
-  end    
+  end
 
-  it 'can get a single merchant by id' do 
+  it "can get a single merchant by id" do
     id = create(:merchant).id
-    
+
     get "/api/v1/merchants/#{id}"
-    
+
     merchant = JSON.parse(response.body, symbolize_names: true)
-    
+
     expect(response).to have_http_status(200)
     expect(merchant[:data]).to have_key(:id)
     expect(merchant[:data][:id]).to be_a(String)
@@ -50,8 +50,7 @@ describe "Merchants API" do
     expect(merchant[:data][:attributes][:name]).to be_a(String)
   end
 
-  it 'will get an invalid id within the path and return a 404' do
-    
+  it "will get an invalid id within the path and return a 404" do
     get "/api/v1/merchants/matildas_glass"
 
     merchant = JSON.parse(response.body, symbolize_names: true)

@@ -8,5 +8,4 @@ class MerchantSerializer
   #     {data: [super[:data]]}
   #   end
   # end
-  
 end
