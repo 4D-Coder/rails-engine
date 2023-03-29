@@ -12,6 +12,7 @@ describe "Merchant Requests" do
 
     expect(merchants).to have_key(:data)
 
+    expect(merchants[:data]).to be_an(Array)
     expect(merchants[:data].count).to eq(3)
 
     merchants[:data].each do |merchant|

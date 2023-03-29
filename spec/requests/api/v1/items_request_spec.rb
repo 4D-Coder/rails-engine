@@ -35,36 +35,54 @@ describe "Item Requests" do
 
       expect(item[:attributes]).to have_key(:unit_price)
       expect(item[:attributes][:unit_price]).to be_a(Float)
+      
+      expect(item[:attributes]).to have_key(:unit_price)
+      expect(item[:attributes][:unit_price]).to be_a(Float)
+
+      expect(item[:attributes]).to have_key(:merchant_id)
+      expect(item[:attributes][:merchant_id]).to be_an(Integer)
     end
   end
 
-  # it "can get a single merchant by id" do
-  #   id = create(:merchant).id
+  it "can get a single item by id" do
+    id = create(:item).id
 
-  #   get "/api/v1/merchants/#{id}"
+    get "/api/v1/items/#{id}"
 
-  #   merchant = JSON.parse(response.body, symbolize_names: true)
+    item = JSON.parse(response.body, symbolize_names: true)
+    
+    expect(response).to have_http_status(200)
 
-  #   expect(response).to have_http_status(200)
-  #   expect(merchant[:data]).to have_key(:id)
-  #   expect(merchant[:data][:id]).to be_a(String)
+    expect(item[:data]).to be_a(Hash)
 
-  #   expect(merchant[:data]).to have_key(:type)
-  #   expect(merchant[:data][:type]).to be_a(String)
+    expect(item[:data]).to have_key(:id)
+    expect(item[:data][:id]).to be_a(String)
 
-  #   expect(merchant[:data]).to have_key(:attributes)
-  #   expect(merchant[:data][:attributes]).to be_a(Hash)
+    expect(item[:data]).to have_key(:type)
+    expect(item[:data][:type]).to be_a(String)
 
-  #   expect(merchant[:data][:attributes]).to have_key(:name)
-  #   expect(merchant[:data][:attributes][:name]).to be_a(String)
-  # end
+    expect(item[:data]).to have_key(:attributes)
+    expect(item[:data][:attributes]).to be_a(Hash)
 
-  # it "will get an invalid id within the path and return a 404" do
-  #   get "/api/v1/merchants/matildas_glass"
+    expect(item[:data][:attributes]).to have_key(:name)
+    expect(item[:data][:attributes][:name]).to be_a(String)
 
-  #   merchant = JSON.parse(response.body, symbolize_names: true)
+    expect(item[:data][:attributes]).to have_key(:description)
+    expect(item[:data][:attributes][:description]).to be_a(String)
 
-  #   expect(response).to have_http_status(404)
-  #   expect(merchant[:error]).to eq("404, Not Found")
-  # end
+    expect(item[:data][:attributes]).to have_key(:unit_price)
+    expect(item[:data][:attributes][:unit_price]).to be_a(Float)
+
+    expect(item[:data][:attributes]).to have_key(:merchant_id)
+    expect(item[:data][:attributes][:merchant_id]).to be_a(Integer)
+  end
+
+  it "will get an invalid id within the path and return a 404" do
+    get "/api/v1/items/random_strain"
+
+    merchant = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(404)
+    expect(merchant[:error]).to eq("404, Not Found")
+  end
 end
