@@ -2,7 +2,7 @@ require "rails_helper"
 
 describe "Item Requests" do
   it "sends a list of items" do
-    create_list(:item, 3)
+    items_list = create_list(:item, 3)
 
     get "/api/v1/items"
 
@@ -13,6 +13,8 @@ describe "Item Requests" do
     expect(items).to have_key(:data)
 
     expect(items[:data].count).to eq(3)
+    expect(items[:data][0][:attributes].count).to eq(4)
+    expect(items[:data][0][:attributes][:name]).to eq(items_list.first.name)
 
     items[:data].each do |item|
       expect(item).to have_key(:id)
@@ -24,18 +26,12 @@ describe "Item Requests" do
       expect(item).to have_key(:attributes)
       expect(item[:attributes]).to be_a(Hash)
 
-      expect(item[:attributes]).to have_key(:id)
-      expect(item[:attributes][:id]).to be_an(Integer)
-
       expect(item[:attributes]).to have_key(:name)
       expect(item[:attributes][:name]).to be_a(String)
 
       expect(item[:attributes]).to have_key(:description)
       expect(item[:attributes][:description]).to be_a(String)
 
-      expect(item[:attributes]).to have_key(:unit_price)
-      expect(item[:attributes][:unit_price]).to be_a(Float)
-      
       expect(item[:attributes]).to have_key(:unit_price)
       expect(item[:attributes][:unit_price]).to be_a(Float)
 
@@ -54,6 +50,9 @@ describe "Item Requests" do
     expect(response).to have_http_status(200)
 
     expect(item[:data]).to be_a(Hash)
+    
+    expect(item[:data].length).to eq(3)
+    expect(item[:data][:attributes].length).to eq(4)
 
     expect(item[:data]).to have_key(:id)
     expect(item[:data][:id]).to be_a(String)
