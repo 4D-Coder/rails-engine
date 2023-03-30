@@ -132,19 +132,15 @@ describe "Item Requests" do
   end
 
   it "destroys an invoice only if the only item on it is being deleted" do
-    invoice = create(:invoice, customer_id: create(:customer).id, merchant_id: create(:merchant).id)
+    invoice = create(:invoice)
+    new_item = create(:item)
 
-    item1 = create(:item)
-    item2 = create(:item)
+    InvoiceItem.create(item_id: new_item.id, invoice_id: invoice.id, quantity: 5, unit_price: new_item.unit_price)
 
-    ii1 = InvoiceItem.create(item_id: item1.id, invoice_id: invoice.id, quantity: 5, unit_price: item1.unit_price)
-    ii2 = InvoiceItem.create(item_id: item2.id, invoice_id: invoice.id, quantity: 6, unit_price: item2.unit_price)
-
-    
-    require 'pry'; binding.pry
-    delete "/api/v1/items/#{item1.id}"
+    delete "/api/v1/items/#{new_item.id}"
     require 'pry'; binding.pry
     
+
     expect(invoice).to exist
     expect(invoice.items).to_not include(item1)
   end

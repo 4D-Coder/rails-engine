@@ -1,5 +1,4 @@
 class Api::V1::ItemsController < ApplicationController
-  rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
   def index
     render json: ItemSerializer.new(all_items)
@@ -21,16 +20,20 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def destroy
-    @item = find_item(items_params[:id])
+    item = find_item(items_params[:id])
+
     begin
-      @item.invoice_items.destroy_all
-      render json: Item.delete(@item.id), status: :no_content
+      destroy_single_item_invoices(item)
+      render json: Item.delete(item.id), status: :no_content
     rescue ActiveRecord::InvalidForeignKey
-      render json: {error: @item.errors.full_messages}
+      render json: {error: item.errors.full_messages}
     end
   end
 
   private
+  def destroy_single_item_invoices(item)
+    item.invoices.find_single_item_invoices.destroy_all
+  end
 
   def find_item(id)
     all_items.find(id)
@@ -38,10 +41,6 @@ class Api::V1::ItemsController < ApplicationController
 
   def all_items
     @_all_items ||= Item.all
-  end
-
-  def not_found
-    render json: { error: "404, Not Found" }, status: :not_found
   end
 
   def items_params

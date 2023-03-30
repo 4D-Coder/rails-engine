@@ -1,7 +1,11 @@
 FactoryBot.define do
   factory :invoice do
-    customer
+    status { ["pending", "shipped"].sample }
     merchant
-    status { ["pending", "packaged", "shipped"].sample }
+    customer
+
+    after(:create) do |invoice|
+      create(:item, invoices: [invoice])
+    end
   end
 end
