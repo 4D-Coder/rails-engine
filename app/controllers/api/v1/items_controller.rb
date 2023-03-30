@@ -21,10 +21,12 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def destroy
-    if find_item(items_params[:id])
-      render json: Item.delete(items_params[:id])
-    else
-      raise ActiveRecord::Gone, "Item #{items_params[:id]} no longer exists"
+    @item = find_item(items_params[:id])
+    begin
+      @item.invoice_items.destroy_all
+      render json: Item.delete(@item.id), status: :no_content
+    rescue ActiveRecord::InvalidForeignKey
+      render json: {error: @item.errors.full_messages}
     end
   end
 

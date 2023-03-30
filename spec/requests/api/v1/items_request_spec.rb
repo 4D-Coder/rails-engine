@@ -131,6 +131,24 @@ describe "Item Requests" do
     expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
   end
 
+  it "destroys an invoice only if the only item on it is being deleted" do
+    invoice = create(:invoice, customer_id: create(:customer).id, merchant_id: create(:merchant).id)
+
+    item1 = create(:item)
+    item2 = create(:item)
+
+    ii1 = InvoiceItem.create(item_id: item1.id, invoice_id: invoice.id, quantity: 5, unit_price: item1.unit_price)
+    ii2 = InvoiceItem.create(item_id: item2.id, invoice_id: invoice.id, quantity: 6, unit_price: item2.unit_price)
+
+    
+    require 'pry'; binding.pry
+    delete "/api/v1/items/#{item1.id}"
+    require 'pry'; binding.pry
+    
+    expect(invoice).to exist
+    expect(invoice.items).to_not include(item1)
+  end
+
   it "raises an error if the destroy attempt fails" do
     item = create(:item)
 
