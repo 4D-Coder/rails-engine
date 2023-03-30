@@ -84,4 +84,29 @@ describe "Item Requests" do
     expect(response).to have_http_status(404)
     expect(merchant[:error]).to eq("404, Not Found")
   end
+
+  it 'can create a new, valid item' do
+    item_params = attributes_for(:item, merchant_id: create(:merchant).id)
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    post "/api/v1/items", headers: headers, params: JSON.generate(item_params)
+
+    created_item = Item.last
+
+    expect(response).to have_http_status(201)
+    
+    expect(created_item.name).to eq(item_params[:name])
+    expect(created_item.description).to eq(item_params[:description])
+    expect(created_item.unit_price).to eq(item_params[:unit_price])
+    expect(created_item.merchant_id).to eq(item_params[:merchant_id])
+  end
+
+  it 'sends an error response when invalid or missing information in JSON request' do
+    item_params = attributes_for(:item, merchant_id: create(:merchant).id, name: nil, unit_price: "15.00")
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    post "/api/v1/items", headers: headers, params: JSON.generate(item_params)
+    require 'pry'; binding.pry
+    expect(response).to have_http_status(400)
+  end
 end
