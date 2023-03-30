@@ -1,4 +1,5 @@
 require "rails_helper"
+require "active_record"
 
 describe "Item Requests" do
   it "sends a list of items" do
@@ -110,5 +111,29 @@ describe "Item Requests" do
 
     expect(response).to have_http_status(422)
     expect(parsed_response[:errors]).to include?("Name can't be blank")
+  end
+
+  it 'sends an error response when missing information in JSON request' do
+    item_params = attributes_for(:item, merchant_id: create(:merchant).id, name: nil)
+    headers = {"CONTENT_TYPE" => "application/json"}
+    
+    post "/api/v1/items", headers: headers, params: JSON.generate(item_params)
+    parsed_response = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(422)
+    expect(parsed_response[:errors]).to include?("Name can't be blank")
+  end
+
+  it "can destroy an item" do
+    item = create(:item)
+
+    expect{ delete "/api/v1/items/#{item.id}" }.to change(Item, :count).by(-1)
+    expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
+  end
+
+  it "raises an error if the destroy attempt fails" do
+    item = create(:item)
+
+    expect{ delete "/api/v1/items/#{item.id}" }.to raise_error(ActiveRecord::Gone)
   end
 end
