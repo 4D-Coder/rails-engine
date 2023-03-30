@@ -101,12 +101,14 @@ describe "Item Requests" do
     expect(created_item.merchant_id).to eq(item_params[:merchant_id])
   end
 
-  it 'sends an error response when invalid or missing information in JSON request' do
-    item_params = attributes_for(:item, merchant_id: create(:merchant).id, name: nil, unit_price: "15.00")
+  it 'sends an error response when missing information in JSON request' do
+    item_params = attributes_for(:item, merchant_id: create(:merchant).id, name: nil)
     headers = {"CONTENT_TYPE" => "application/json"}
-
+    
     post "/api/v1/items", headers: headers, params: JSON.generate(item_params)
-    require 'pry'; binding.pry
-    expect(response).to have_http_status(400)
+    parsed_response = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(422)
+    expect(parsed_response[:errors]).to include?("Name can't be blank")
   end
 end

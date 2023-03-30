@@ -1,6 +1,6 @@
 class Api::V1::ItemsController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
-
+  
   def index
     render json: ItemSerializer.new(all_items)
   end
@@ -11,8 +11,12 @@ class Api::V1::ItemsController < ApplicationController
 
   def create
     @new_item = Item.create(items_params)
-    
-    render json: ItemSerializer.new(@new_item), status: :created
+
+    if @new_item.save
+      render json: ItemSerializer.new(@new_item), status: :created
+    else
+      record_invalid(@new_item)
+    end
   end
 
   private
@@ -27,6 +31,10 @@ class Api::V1::ItemsController < ApplicationController
 
   def not_found
     render json: { error: "404, Not Found" }, status: :not_found
+  end
+
+  def record_invalid(new_item)
+    render json: {errors: new_item.errors.full_messages}, status: :unprocessable_entity
   end
 
   def items_params
