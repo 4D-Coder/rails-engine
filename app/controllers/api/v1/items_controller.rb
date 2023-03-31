@@ -21,18 +21,18 @@ class Api::V1::ItemsController < ApplicationController
 
   def destroy
     item = find_item(items_params[:id])
-
     begin
-      destroy_single_item_invoices(item)
-      render json: Item.delete(item.id), status: :no_content
+      item.find_single_item_invoices.destroy_all
+      item.destroy
     rescue ActiveRecord::InvalidForeignKey
       render json: {error: item.errors.full_messages}
     end
   end
 
   private
-  def destroy_single_item_invoices(item)
-    item.invoices.find_single_item_invoices.destroy_all
+
+  def destroy_associations
+    find_single_item_invoices.destroy_all
   end
 
   def find_item(id)

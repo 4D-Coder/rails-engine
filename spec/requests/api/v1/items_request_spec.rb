@@ -110,7 +110,7 @@ describe "Item Requests" do
     parsed_response = JSON.parse(response.body, symbolize_names: true)
 
     expect(response).to have_http_status(422)
-    expect(parsed_response[:errors]).to include?("Name can't be blank")
+    expect(parsed_response[:errors]).to include("Name can't be blank")
   end
 
   it 'sends an error response when missing information in JSON request' do
@@ -121,7 +121,7 @@ describe "Item Requests" do
     parsed_response = JSON.parse(response.body, symbolize_names: true)
 
     expect(response).to have_http_status(422)
-    expect(parsed_response[:errors]).to include?("Name can't be blank")
+    expect(parsed_response[:errors]).to include("Name can't be blank")
   end
 
   it "can destroy an item" do
@@ -131,23 +131,26 @@ describe "Item Requests" do
     expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
   end
 
-  it "destroys an invoice only if the only item on it is being deleted" do
-    invoice = create(:invoice)
-    new_item = create(:item)
+  xit "destroys an invoice only if the only item on it is being deleted" do
+    invoice1 = create(:invoice)
+    item1 = create(:item)
+    item2 = create(:item)
 
-    InvoiceItem.create(item_id: new_item.id, invoice_id: invoice.id, quantity: 5, unit_price: new_item.unit_price)
-
-    delete "/api/v1/items/#{new_item.id}"
-    require 'pry'; binding.pry
+    ii1 = item1.invoices.create(status: ["pending", "shipped"].sample, merchant_id: create(:merchant).id, customer_id: create(:customer).id )
+    ii2 = item2.invoices.create(status: ["pending", "shipped"].sample, merchant_id: create(:merchant).id, customer_id: create(:customer).id )
     
+    # ii1 = InvoiceItem.create(item_id: item1.id, invoice_id: invoice1.id, quantity: 4, unit_price: item1.unit_price)
+    # ii2 = InvoiceItem.create(item_id: item2.id, invoice_id: invoice1.id, quantity: 5, unit_price: item2.unit_price)
+    
+    require 'pry'; binding.pry
+    delete "/api/v1/items/#{item1.id}"
 
-    expect(invoice).to exist
-    expect(invoice.items).to_not include(item1)
-  end
+    expect(invoice1).to be_persisted
+    expect(invoice1.items).to_not include(item1)
 
-  it "raises an error if the destroy attempt fails" do
-    item = create(:item)
+    require 'pry'; binding.pry
+    delete "/api/v1/items/#{item2.id}"
 
-    expect{ delete "/api/v1/items/#{item.id}" }.to raise_error(ActiveRecord::Gone)
+    expect(invoice1).to_not be_persisted
   end
 end

@@ -18,19 +18,21 @@ RSpec.describe Item, type: :model do
   describe '#instance methods' do
     context '#find_single_item_invoices' do
       before(:each) do
-        @new_item = create(:item)
+        @item1 = create(:item)
+        @item2 = create(:item)
+        
         @invoice1 = create(:invoice) # Two items
         @invoice2 = create(:invoice) # Two items
 
-        # Making sure the @new_item is on both invoices
-        InvoiceItem.create!(item_id: @new_item.id, invoice_id: @invoice1.id, quantity: 6, unit_price: @new_item.unit_price)
-        InvoiceItem.create!(item_id: @new_item.id, invoice_id: @invoice2.id, quantity: 2, unit_price: @new_item.unit_price)
+        # Making sure @item1 is on both invoices
+        @ii1 = InvoiceItem.create!(item_id: @item1.id, invoice_id: @invoice1.id, quantity: 6, unit_price: @item1.unit_price)
+        @ii2 = InvoiceItem.create!(item_id: @item1.id, invoice_id: @invoice2.id, quantity: 2, unit_price: @item1.unit_price)
+        @ii3 = InvoiceItem.create!(item_id: @item2.id, invoice_id: @invoice2.id, quantity: 28, unit_price: @item1.unit_price)
       end
+
       it 'finds all invoices of an item where there is only one' do
-        require 'pry'; binding.pry
-        @invoice2.items.last.delete
-        expect(@new_item.find_single_item_invoices).to eq(@invoice1)
-        expect(@new_item.find_single_item_invoices).to_not include(@invoice2)
+        expect(@item1.find_single_item_invoices.first).to eq(@invoice1)
+        expect(@item1.find_single_item_invoices).to_not include(@invoice2)
       end
     end
   end
