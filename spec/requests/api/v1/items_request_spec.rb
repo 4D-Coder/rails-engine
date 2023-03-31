@@ -1,4 +1,5 @@
 require "rails_helper"
+require "active_record"
 
 describe "Item Requests" do
   it "sends a list of items" do
@@ -83,5 +84,70 @@ describe "Item Requests" do
 
     expect(response).to have_http_status(404)
     expect(merchant[:error]).to eq("404, Not Found")
+  end
+
+  it 'can create a new, valid item' do
+    item_params = attributes_for(:item, merchant_id: create(:merchant).id)
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    post "/api/v1/items", headers: headers, params: JSON.generate(item_params)
+
+    created_item = Item.last
+
+    expect(response).to have_http_status(201)
+    
+    expect(created_item.name).to eq(item_params[:name])
+    expect(created_item.description).to eq(item_params[:description])
+    expect(created_item.unit_price).to eq(item_params[:unit_price])
+    expect(created_item.merchant_id).to eq(item_params[:merchant_id])
+  end
+
+  it 'sends an error response when missing information in JSON request' do
+    item_params = attributes_for(:item, merchant_id: create(:merchant).id, name: nil)
+    headers = {"CONTENT_TYPE" => "application/json"}
+    
+    post "/api/v1/items", headers: headers, params: JSON.generate(item_params)
+    parsed_response = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(422)
+    expect(parsed_response[:errors]).to include("Name can't be blank")
+  end
+
+  it 'sends an error response when missing information in JSON request' do
+    item_params = attributes_for(:item, merchant_id: create(:merchant).id, name: nil)
+    headers = {"CONTENT_TYPE" => "application/json"}
+    
+    post "/api/v1/items", headers: headers, params: JSON.generate(item_params)
+    parsed_response = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(422)
+    expect(parsed_response[:errors]).to include("Name can't be blank")
+  end
+
+  it "can destroy an item" do
+    item = create(:item)
+
+    expect{ delete "/api/v1/items/#{item.id}" }.to change(Item, :count).by(-1)
+    expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
+  end
+
+  it "destroys an invoice only if the only item on it is being deleted" do
+    invoice1 = create(:invoice)
+    item1 = create(:item)
+    item2 = create(:item)
+
+    ii1 = item1.invoices.create(status: ["pending", "shipped"].sample, merchant_id: create(:merchant).id, customer_id: create(:customer).id )
+    ii2 = item2.invoices.create(status: ["pending", "shipped"].sample, merchant_id: create(:merchant).id, customer_id: create(:customer).id )
+    
+    # ii1 = InvoiceItem.create(item_id: item1.id, invoice_id: invoice1.id, quantity: 4, unit_price: item1.unit_price)
+    # ii2 = InvoiceItem.create(item_id: item2.id, invoice_id: invoice1.id, quantity: 5, unit_price: item2.unit_price)
+    
+    delete "/api/v1/items/#{item1.id}"
+
+    expect(invoice1).to be_persisted
+    expect(invoice1.items).to_not include(item1)
+
+    delete "/api/v1/items/#{item2.id}"
+    expect(invoice1).to_not be_persisted
   end
 end
