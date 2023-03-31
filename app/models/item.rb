@@ -9,6 +9,6 @@ class Item < ApplicationRecord
   def find_single_item_invoices
     invoices.joins(:invoice_items)
     .group('invoices.id')
-    .having('count(invoice_items.id) <= 1')
+    .having('count(invoice_items.id) = 1')
   end
 end

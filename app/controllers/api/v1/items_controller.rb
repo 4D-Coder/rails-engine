@@ -31,9 +31,9 @@ class Api::V1::ItemsController < ApplicationController
 
   private
 
-  def destroy_associations
-    find_single_item_invoices.destroy_all
-  end
+  # def destroy_associations
+  #   find_single_item_invoices.destroy_all
+  # end
 
   def find_item(id)
     all_items.find(id)
